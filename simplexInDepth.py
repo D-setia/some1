@@ -686,11 +686,12 @@ class DataToTableScene(MovingCameraScene):
         staggeredBasicVar2ToTable = [ReplacementTransform(productionEqOrg[1], table1.get_rows()[3][0]), 
         FadeOut(productionEqOrg[2]), ReplacementTransform(productionEqOrg[3], table1.get_rows()[3][5]),]
 
-        staggeredObjEqToTable = [FadeOut(objFunc), ReplacementTransform(objEqn[0], table1.get_rows()[1][0]), 
+                                #FadeOut(objFunc)
+        staggeredObjEqToTable = [ ReplacementTransform(objEqn[0], table1.get_rows()[1][0]), 
         ReplacementTransform(objEqn[1], table1.get_rows()[1][1]), ReplacementTransform(objEqn[2], table1.get_rows()[0][1]), 
         ReplacementTransform(objEqn[3], table1.get_rows()[1][2]), ReplacementTransform(objEqn[4], table1.get_rows()[0][2]),
         FadeIn(table1.get_rows()[1][3], table1.get_rows()[1][4]), FadeOut(objEqn[5]), 
-        ReplacementTransform(objEqn[6], table1.get_rows()[1][5])]
+        ReplacementTransform(objEqn[6], table1.get_rows()[1][5]), Create(table1.get_horizontal_lines()[1])]
 
         # self.add(optimizeText, objFunc, constraintsText, scriptingEq, productionEq, atTheOriginText, 
         # scriptingEqOrg, productionEqOrg, basicVarsBrace, basicVarsText, table1, objEqn)
@@ -757,4 +758,318 @@ class DataToTableScene(MovingCameraScene):
         self.wait()
         self.play(LaggedStart(*staggeredObjEqToTable, lag_ratio=0.3), run_time=6)
         self.wait(3)
+
+
+
+
+
+class SimplexCalculationsScene(MovingCameraScene):
+    def construct(self):
+
+        self.camera.frame.save_state()
+        # self.camera.frame.scale(0.9)#.shift(LEFT*1.7) MathTex("", color = textColorNormal).shift()
+
+
+        objFunc = MathTex("Z = ","1.5","x_1","+","0.5","x_2", color = textColorNormal).shift(UP*3, LEFT*4.7)
+        objFuncAtOrigin = MathTex("=1.5*0+0.5*0", color = textColorNormal).shift(UP*3, LEFT*0.6)
+        val0 = MathTex("=0", color = textColorNormal).shift(UP*3, RIGHT*2)
+        objEqn = MathTex("Z ","-1.5","x_1","-0.5","x_2","=","0", color = textColorNormal).shift(UP*3, RIGHT)
+
+        backgroundHighlightRect = Rectangle(color=GREEN, height=1, width=1.3).set_opacity(0.7).shift(RIGHT*3.7, DOWN*0.5)
+
+        table1 = simplexTables.table1
+        # table1.get_rows()[0][5].add_to_back(backgroundHighlightRect)
+        #table1.get_horizontal_lines()[1]
+
+        underlineX1Coeff = Underline(objFunc[1], color = BLUE)
+        underlineX2Coeff = Underline(objFunc[3:5], color = BLUE)
+        rateOfImprovText = Tex("Rates of improvement", color = dodgerBlue).scale(0.9).next_to(underlineX1Coeff, DOWN).shift(RIGHT)
+        ratesOfImprovement = VGroup(underlineX1Coeff, underlineX2Coeff, rateOfImprovText)
+
+        frameBoxObjFunc = SurroundingRectangle(objFunc[1], buff=0.1, color = PURE_RED)
+        frameBoxObjEqn = SurroundingRectangle(objEqn[1], buff=0.1, color = PURE_RED)
+        frameBoxObjEqnSimplex = SurroundingRectangle(table1.get_rows()[1][1], buff=0.1, color = PURE_RED)
+        frameboxes = VGroup(frameBoxObjFunc, frameBoxObjEqnSimplex)
+
+        ratioHeading = MathTex("C","/","Coeff", color = textColorNormal).scale(0.9).shift(RIGHT*5.8, DOWN*0.6)
+        ratioHeading2 = MathTex("C","/","Coeff", color = textColorNormal).scale(0.7).shift(RIGHT*5.8, DOWN*0.6)
+        ratio1 = MathTex("45","/","1","=","45", color = textColorNormal).scale(0.9).shift(RIGHT*5.8, DOWN*1.6)
+        ratio2 = MathTex("54","/","4","=","13.5", color = textColorNormal).scale(0.9).shift(RIGHT*5.8, DOWN*2.6)
+
+        ratio3 = MathTex("\\frac{31.5}{2.75}","=","11.45", color = textColorNormal).scale(0.7).shift(RIGHT*5.8, DOWN*1.6)
+        ratio4 = MathTex("\\frac{13.5}{0.25}","=","54", color = textColorNormal).scale(0.7).shift(RIGHT*5.8, DOWN*2.6)
+        ratios = VGroup(ratioHeading, ratio1, ratio2)
+
+        axes = Axes(
+            x_range=[-1*16/9, 50*16/9, 10],
+            y_range=[-1, 50, 10],
+            y_length=7,
+            x_length=7*16/9,
+            x_axis_config={"color":BLACK},
+            y_axis_config={"color":BLACK}
+        ).scale(1.7).shift(UP*5, RIGHT*9)
+
+        constraint1 = axes.get_graph(lambda x: -1/3*x+10, color = BLACK)
+        constraint2 = axes.get_graph(lambda x: -4*x+36, color = BLACK)
+
+        dotA = Dot([-1.165,-0.7,0], color=ORANGE).scale(0.8)
+        dotB = Dot([0.94,-0.7,0], color=ORANGE).scale(0.8)
+        dotC = Dot([0.49,1.08,0], color=RED).scale(0.8)
+        dotD = Dot([-1.165,1.63,0], color=ORANGE).scale(0.8)
+
+        constraint1Eq = MathTex("x + 3y = 45", color = textColorNormal).shift(UP*0.3, RIGHT*4.5)
+        constraint2Eq = MathTex("4x + y = 54", color = textColorNormal).shift(DOWN*2, RIGHT*2.7)
+        commonShadedPink = Polygon([-1.165,-0.7,0], [0.94,-0.7,0], [0.49,1.08,0], [-1.165,1.63,0])
+        commonShadedPink.set_fill(color = PINK, opacity= 0.7)
+        commonShadedPink.set_stroke(width=0)       
+        commonShadedBlue = Polygon([-1.165,-0.7,0], [0.94,-0.7,0], [0.49,1.08,0], [-1.165,1.63,0])
+        commonShadedBlue.set_fill(color = BLUE, opacity= 0.7)
+        commonShadedBlue.set_stroke(width=0)
+        constraint1Intercept = MathTex("45", color = textColorNormal).shift(DOWN, RIGHT*5.5)
+        constraint2Intercept = MathTex("13.5", color = textColorNormal).shift(DOWN, RIGHT*0.5)
+        xSmallestInterceptUnderline = Underline(constraint2Intercept, color = PURE_RED)
+        currentPt = Dot(color=selectedVertexColor).scale(1.3).shift(dotA.get_center())
+        
+        
+        currentPt2 = Dot(color=selectedVertexColor).scale(1.3).shift(dotB.get_center())
+        currentPt3 = Dot(color=selectedVertexColor).scale(1.3).shift(dotC.get_center())
+
+        graph = VGroup(commonShadedBlue, commonShadedPink, axes, constraint1, constraint2, 
+        constraint1Eq, constraint2Eq, currentPt)
+        # constraint2Intercept, constraint1Intercept, xSmallestInterceptUnderline,
+
+        pivotRowFramebox = SurroundingRectangle(table1.get_rows()[3], color = PURE_RED)
+        pivotColFramebox = SurroundingRectangle(table1.get_columns()[1], color = PURE_RED)
+        pivotRowText = Tex("Pivot Row", color = PURE_RED).scale(0.9).next_to(pivotRowFramebox, LEFT)
+        pivotColText = Tex("Pivot Column", color = PURE_RED).scale(0.9).next_to(pivotColFramebox, UP).shift(RIGHT)
+
+        pivotElementText = Tex("Pivot Element", color = dodgerBlue).scale(0.9).next_to(pivotRowFramebox, DOWN).shift(LEFT)
+        backgroundHighlightRect2 = Rectangle(color=dodgerBlue, height=0.5, width=1.02).set_opacity(0.5).shift(LEFT*2.2, DOWN*2.6)
+
+        s2Underline = Underline(table1.get_rows()[3][0], color = PURE_RED).scale(1.3)
+        x1Underline = Underline(table1.get_rows()[0][1], color = PURE_RED).scale(1.3)
+
+        extendedTable = VGroup(table1,ratios)#.scale(0.6).shift(LEFT*4.5, DOWN*1.3)
+        # extendedTable.shift(RIGHT*4.5, UP*1.3).scale(5/3)
+        # table1.get_rows()[3][1].add_to_back(backgroundHighlightRect2)
+
+
+        # staggeredColLabelDisp = [FadeIn(table1.get_rows()[0][1]), FadeIn(table1.get_rows()[0][2]), 
+        # FadeIn(table1.get_rows()[0][3]), FadeIn(table1.get_rows()[0][4]), FadeIn(table1.get_rows()[0][5])]
+
+        modifiedLastRow1 = simplexTables.modifiedLastRow1
+        modifiedLastRow2 = simplexTables.modifiedLastRow2
+
+        modifiedObjFunc1 = simplexTables.modifiedObjFunc1
+        modifiedObjFunc2 = simplexTables.modifiedObjFunc2
+
+        modifiedR2_1 = simplexTables.modifiedR2_1
+        modifiedR2_c2 = simplexTables.modifiedR2_2
+
+
+        rowLabel1 = MathTex("R_1", color = textColorNormal).shift(DOWN*0.55, LEFT*5.5).scale(0.9)
+        rowLabel2 = MathTex("R_2", color = textColorNormal).shift(DOWN*1.575, LEFT*5.5).scale(0.9)
+        rowLabel3 = MathTex("R_3", color = textColorNormal).shift(DOWN*2.6, LEFT*5.5).scale(0.9)
+
+        gaussJordElimGeneral = MathTex("R_{i,New} "," = R_{i,Current} ","- (Pivot Column Coeff)_{R_i}","*R_{Pivot}", 
+        color = textColorNormal).shift(UP*3)
+        gaussJordElimR1 = MathTex("R_{1,New}"," = ","R_{1,Current} ","- ","(Pivot Column Coeff)_{R_1}","*",
+        "R_{Pivot}", color = textColorNormal).scale(0.9).shift(UP*2)
+        gaussJordElimR1a = MathTex("R_{1,New}"," = ","[","-1.5",",","-0.5",",","0",",","0",",","0","] ","- ",
+        "(-1.5)","*","[","1",",","0.25",",","0",",","0.25",",","13.5","]", color = textColorNormal).scale(0.9).shift(UP*2, RIGHT*0.2)
+        gaussJordElimR1b = MathTex("R_{1,New}"," = ","[","-1.5",",","-0.5",",","0",",","0",",","0","] ","- ",
+        "[","-1.5",",","-0.375",",","0",",","-0.375",",","-20.25","]", color = textColorNormal).scale(0.9).shift(UP*2, RIGHT*0.5)
+        gaussJordElimR1c = MathTex("R_{1,New}"," = ","[","0",",","-0.125",",","0",",","0.375",",","20.25","]", 
+        color = textColorNormal).scale(0.9).shift(UP*2, LEFT*2)
+
+        staggeredGaussJordAnimR1 = [ ReplacementTransform(gaussJordElimR1[2], gaussJordElimR1a[2:13]),
+            TransformFromCopy(table1.get_rows()[1][1],  gaussJordElimR1a[3]), TransformFromCopy(table1.get_rows()[1][2],  gaussJordElimR1a[5]),
+            TransformFromCopy(table1.get_rows()[1][3],  gaussJordElimR1a[7]), TransformFromCopy(table1.get_rows()[1][4],  gaussJordElimR1a[9]),
+            TransformFromCopy(table1.get_rows()[1][5],  gaussJordElimR1a[11]), ReplacementTransform(gaussJordElimR1[4], gaussJordElimR1a[14]), 
+            TransformFromCopy(table1.get_rows()[1][1],  gaussJordElimR1a[14]),  ReplacementTransform(gaussJordElimR1[5], gaussJordElimR1a[15]),
+            ReplacementTransform(gaussJordElimR1[6], gaussJordElimR1a[16:27]), TransformFromCopy(table1.get_rows()[3][1],  gaussJordElimR1a[17]), 
+            TransformFromCopy(table1.get_rows()[3][2],  gaussJordElimR1a[19]), TransformFromCopy(table1.get_rows()[3][3],  gaussJordElimR1a[21]), 
+            TransformFromCopy(table1.get_rows()[3][4],  gaussJordElimR1a[23]), TransformFromCopy(table1.get_rows()[3][5],  gaussJordElimR1a[25]),
+        ]
+
+        staggeredObjFuncMod1 = [
+            FadeOut(gaussJordElimR1[:2]), Transform(table1.get_rows()[1][1], modifiedObjFunc1[1]),
+            FadeOut(gaussJordElimR1c[2]), ReplacementTransform(gaussJordElimR1c[3], modifiedObjFunc1[1]),
+            Transform(table1.get_rows()[1][2], modifiedObjFunc1[2]), FadeOut(gaussJordElimR1c[4]), 
+            ReplacementTransform(gaussJordElimR1c[5], modifiedObjFunc1[2]), Transform(table1.get_rows()[1][3], modifiedObjFunc1[3]),
+            FadeOut(gaussJordElimR1c[6]), ReplacementTransform(gaussJordElimR1c[7], modifiedObjFunc1[3]),
+            Transform(table1.get_rows()[1][4], modifiedObjFunc1[4]), FadeOut(gaussJordElimR1c[8]), 
+            ReplacementTransform(gaussJordElimR1c[9], modifiedObjFunc1[4]), Transform(table1.get_rows()[1][5], modifiedObjFunc1[5]),
+            FadeOut(gaussJordElimR1c[10]), ReplacementTransform(gaussJordElimR1c[11], modifiedObjFunc1[5]), 
+            FadeOut(gaussJordElimR1c[12])
+        ]
+
+
+        gaussJordElimR2 = MathTex("R_{2,New}"," = ","R_{2,Current} ","- ","(Pivot Column Coeff)_{R_2}","*","R_{Pivot}", 
+        color = textColorNormal).scale(0.9).shift(UP*2)
+        gaussJordElimR2a = MathTex("R_{2,New}"," = ","[","1",",","3",",","1",",","0",",","45","] ","- ","1","*","[","1",",",
+        "0.25",",","0",",","0.25",",","13.5","]", color = textColorNormal).scale(0.9).shift(UP*2)
+        gaussJordElimR2b = MathTex("R_{2,New}"," = ","[","0",",","2.75",",","1",",","-0.25",",","31.5","]", 
+        color = textColorNormal).scale(0.9).shift(UP*2)
+
+
+
+        
+        pivotElement2 = Rectangle(color=dodgerBlue, height=0.5, width=1.02).set_opacity(0.5).shift(table1.get_rows()[2][2].get_center())
+        modifiedLastRow3 = simplexTables.modifiedLastRow3
+        modifiedR2_2 = simplexTables.modifiedR2_2
+
+        x1_final = MathTex("x_1 ","= ","10.64", color = textColorNormal).shift(UP*3)
+        x2_final = MathTex("x_2 ","= ","11.45", color = textColorNormal).shift(UP*2)
+        
+
+        # gaussJordTransformationsI
+
+    #     self.add(table1, objFunc, objFuncAtOrigin, val0, ratesOfImprovement, frameboxes,  x1Underline, s2Underline, 
+    #     modifiedLastRow1, modifiedLastRow2)#pivotRowFramebox, 
+    #     self.play(Transform(table1.get_rows()[3][0], table2.get_rows()[3][0]))
+    #    pivotColFramebox, pivotRowText, pivotColText, pivotElementText)#, ratios, graph)
+
+        self.add(table1, objFunc)
+        self.wait()
+        self.play(FadeIn(objFuncAtOrigin))
+        self.play(FadeIn(val0), FadeIn(backgroundHighlightRect))
+        self.wait(2)
+        self.play(FadeOut(backgroundHighlightRect, objFuncAtOrigin, val0))
+        self.wait()
+        self.play(Create(underlineX1Coeff), Create(underlineX2Coeff), FadeIn(rateOfImprovText)),
+        self.wait()
+        self.play(Uncreate(underlineX1Coeff), Uncreate(underlineX2Coeff), FadeOut(rateOfImprovText), Create(frameBoxObjFunc))
+        self.wait()
+        self.play(FadeIn(objEqn))
+        self.wait()
+        self.play(Create(frameBoxObjEqn), Create(frameBoxObjEqnSimplex))
+        self.wait(2)
+        self.play(Uncreate(frameBoxObjFunc), Uncreate(frameBoxObjEqn), Uncreate(frameBoxObjEqnSimplex), FadeOut(objEqn, objFunc))
+        self.wait()
+        self.play(FadeIn(ratioHeading), run_time=0.7)
+        self.wait()
+        self.play(FadeIn(ratio1[1]), TransformFromCopy(table1.get_rows()[2][5], ratio1[0]), TransformFromCopy(table1.get_rows()[2][1], ratio1[2]))
+        self.play(FadeIn(ratio1[3:]), run_time=0.7)
+        self.wait()
+        self.play(FadeIn(ratio2[1]), TransformFromCopy(table1.get_rows()[3][5], ratio2[0]), TransformFromCopy(table1.get_rows()[3][1], ratio2[2]))
+        self.play(FadeIn(ratio2[3:]), run_time=0.7)
+        self.wait()
+        self.play(extendedTable.animate.scale(0.6).shift(LEFT*4.5, DOWN*1.3), FadeIn(graph))
+        self.wait()
+        self.play(ReplacementTransform(ratio1, constraint1Intercept))
+        self.play(ReplacementTransform(ratio2, constraint2Intercept))
+        self.play(FadeOut(ratioHeading), run_time=0.7)
+        self.wait()
+        self.play(Transform(currentPt, currentPt2))
+        self.wait()
+        self.play(FadeOut(graph, constraint1Intercept, constraint2Intercept), 
+            table1.animate.shift(RIGHT*4, UP*1.3).scale(5/3))
+        self.wait()
+        self.play(Create(x1Underline))
+        self.wait()
+        self.play(Create(s2Underline))
+        self.wait()
+        self.play(Uncreate(s2Underline), Uncreate(x1Underline))
+        self.play(Create(pivotColFramebox), FadeIn(pivotColText))
+        self.wait()
+        self.play(Create(pivotRowFramebox), FadeIn(pivotRowText))
+        self.wait()
+        self.play(FadeIn(backgroundHighlightRect2, pivotElementText))
+        self.wait()
+        self.play(Uncreate(pivotColFramebox), Uncreate(pivotRowFramebox), 
+            FadeOut(pivotRowText, pivotColText, pivotElementText))
+
+        self.wait()
+        self.play(Transform(table1.get_rows()[3][0], modifiedLastRow1[0]))
+        self.wait()
+        self.play(FadeOut(backgroundHighlightRect2))
+        staggeredLastRowMod1 = [Transform(table1.get_rows()[3][1], modifiedLastRow1[1]), 
+        Transform(table1.get_rows()[3][2], modifiedLastRow1[2]), Transform(table1.get_rows()[3][3], modifiedLastRow1[3]), 
+        Transform(table1.get_rows()[3][4], modifiedLastRow1[4]), Transform(table1.get_rows()[3][5], modifiedLastRow1[5])]
+        self.play(LaggedStart(*staggeredLastRowMod1, lag_ratio=0.3), run_time=4)
+        self.wait()
+        self.play(Transform(table1.get_rows()[3][1], modifiedLastRow2[1]), 
+        Transform(table1.get_rows()[3][2], modifiedLastRow2[2]), Transform(table1.get_rows()[3][3], modifiedLastRow2[3]), 
+        Transform(table1.get_rows()[3][4], modifiedLastRow2[4]), Transform(table1.get_rows()[3][5], modifiedLastRow2[5]))
+        self.wait()
+
+        staggeredGaussJordGeneral = [FadeIn(gaussJordElimGeneral[0]), FadeIn(gaussJordElimGeneral[1]),
+        FadeIn(gaussJordElimGeneral[2]), FadeIn(gaussJordElimGeneral[3])]
+        self.play(LaggedStart(*staggeredGaussJordGeneral, lag_ratio=0.3), run_time=4)
+        self.wait()
+        self.play(FadeIn(gaussJordElimR1))
+
+
+
+
+        # self.add(table1, modifiedLastRow1, modifiedLastRow2, rowLabel1, rowLabel2, rowLabel3, gaussJordElimGeneral, gaussJordElimR1)
+        self.wait()
+        self.play(ApplyMethod(gaussJordElimR1[3:].shift, RIGHT*1.4), run_time=0.7)
+        self.play(LaggedStart(*staggeredGaussJordAnimR1, lag_ratio=0.3), run_time=12)
+        self.wait()
+        self.play(Transform(gaussJordElimR1a[14:], gaussJordElimR1b[14:]))
+        self.wait()
+        gaussJordElimR1[2:].set_opacity(0)
+        self.play(ReplacementTransform(gaussJordElimR1a[2:], gaussJordElimR1c[2:]))
+        self.wait()
+        self.play(LaggedStart(*staggeredObjFuncMod1, lag_ratio=0.3), run_time=6)
+        self.wait()
+        self.play(FadeIn(gaussJordElimR2), FadeOut(modifiedObjFunc1[1:]))
+        self.wait()
+        self.play(ReplacementTransform(gaussJordElimR2, gaussJordElimR2a))
+        self.wait()
+        self.play(ReplacementTransform(gaussJordElimR2a, gaussJordElimR2b))
+        self.wait()
+        self.play(Transform(table1.get_rows()[2][1], modifiedR2_1[1]), Transform(table1.get_rows()[2][2], modifiedR2_1[2]),
+        Transform(table1.get_rows()[2][3], modifiedR2_1[3]), Transform(table1.get_rows()[2][4], modifiedR2_1[4]),
+        Transform(table1.get_rows()[2][5], modifiedR2_1[5]), FadeOut(gaussJordElimR2b, gaussJordElimGeneral))
+        self.wait(3)
+
+        modifiedR2_1.set_opacity(0)
+        iter2EnterVarUnderline = Underline(table1.get_rows()[1][2], color = PURE_RED)
+
+        self.play(Create(iter2EnterVarUnderline))
+        self.wait()
+        self.play(Uncreate(iter2EnterVarUnderline), FadeIn(ratioHeading2), run_time=0.7)
+        self.play(FadeIn(ratio3), run_time=0.7)
+        self.play(FadeIn(ratio4), run_time=0.7)
+        self.wait()
+        self.play(FadeIn(pivotElement2))
+        self.wait()
+        self.play(FadeOut(pivotElement2), FadeOut(ratio4, ratio3, ratioHeading2))
+        self.play(
+        Transform(table1.get_rows()[1][1], modifiedObjFunc2[1]), Transform(table1.get_rows()[1][2], modifiedObjFunc2[2]),
+        Transform(table1.get_rows()[1][3], modifiedObjFunc2[3]), Transform(table1.get_rows()[1][4], modifiedObjFunc2[4]),
+        Transform(table1.get_rows()[1][5], modifiedObjFunc2[5]),
+        Transform(table1.get_rows()[2][1], modifiedR2_2[1]), Transform(table1.get_rows()[2][2], modifiedR2_2[2]),
+        Transform(table1.get_rows()[2][3], modifiedR2_2[3]), Transform(table1.get_rows()[2][4], modifiedR2_2[4]),
+        Transform(table1.get_rows()[2][5], modifiedR2_2[5]),
+        Transform(table1.get_rows()[3][1], modifiedLastRow3[1]), Transform(table1.get_rows()[3][2], modifiedLastRow3[2]),
+        Transform(table1.get_rows()[3][3], modifiedLastRow3[3]), Transform(table1.get_rows()[3][4], modifiedLastRow3[4]),
+        Transform(table1.get_rows()[3][5], modifiedLastRow3[5]),)
+        self.wait(2)
+
+        underlineNoNeg1 = Underline(table1.get_rows()[1][1], color = PURE_RED)
+        underlineNoNeg2 = Underline(table1.get_rows()[1][2], color = PURE_RED)
+        underlineNoNeg3 = Underline(table1.get_rows()[1][3], color = PURE_RED)
+        underlineNoNeg4 = Underline(table1.get_rows()[1][4], color = PURE_RED)
+        self.play(Create(underlineNoNeg1), Create(underlineNoNeg2), Create(underlineNoNeg3), Create(underlineNoNeg4))
+        self.wait()
+        self.play(Uncreate(underlineNoNeg1), Uncreate(underlineNoNeg2), Uncreate(underlineNoNeg3), Uncreate(underlineNoNeg4))
+        self.play(TransformFromCopy(table1.get_rows()[3][0], x1_final[0]),  TransformFromCopy(table1.get_rows()[3][5], x1_final[2]))
+        self.play(FadeIn(x1_final[1]), run_time=0.5)
+        self.play(TransformFromCopy(table1.get_rows()[2][0], x2_final[0]), TransformFromCopy(table1.get_rows()[2][5], x2_final[2]))
+        self.play(FadeIn(x2_final[1]), run_time=0.5)
+        self.wait()
+
+
+        graph.shift(RIGHT*10, DOWN)
+        currentPt3.shift(LEFT*2, DOWN)
+        self.play(table1.animate.shift(LEFT*14), graph.animate.shift(LEFT*12))
+        self.wait()
+        self.play(Transform(currentPt, currentPt3), x1_final.animate.shift(DOWN*1.4), x2_final.animate.shift(DOWN*1.2))
+        self.wait(3)
+
+
 
